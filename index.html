@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Gerador de Anúncios - Multi Mundos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .world-selector {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .world-selector h2 {
+            color: #667eea;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        
+        .world-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .world-btn {
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #555;
+        }
+        
+        .world-btn:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+        
+        .world-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .sync-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .sync-btn:hover {
+            background: #45a049;
+        }
+        
+        .sync-action-btn {
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .sync-action-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .world-selector {
+                padding: 16px;
+            }
+            
+            .world-selector h2 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            
+            .world-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 8px;
+            }
+            
+            .world-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 15px;
+            }
+            
+            .inline-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .output-area {
+                font-size: 12px;
+                padding: 16px;
+                max-height: 500px;
+            }
+            
+            .copy-btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .world-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .output-area {
+                font-size: 11px;
+                padding: 12px;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        @media (max-width: 768px) {
+            input[type="text"],
+            input[type="number"],
+            textarea {
+                font-size: 16px; /* Previne zoom no iOS */
+                padding: 12px;
+            }
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .inline-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .output-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            min-height: 400px;
+            position: relative;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            transition: background 0.3s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @media (max-width: 768px) {
+            .copy-btn {
+                padding: 16px 24px;
+                font-size: 16px;
+            }
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .add-item-btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 8px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @media (max-width: 768px) {
+            .add-item-btn {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+        }
+        
+        .add-item-btn:hover {
+            background: #653a8e;
+        }
+        
+        .item-entry {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @media (max-width: 768px) {
+            .remove-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+                top: 6px;
+                right: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Seletor de Mundos -->
+    <div class="world-selector">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h2 style="margin: 0;">🌍 Selecione o Mundo</h2>
+            <button class="sync-btn" onclick="toggleSyncPanel()">🔄 Sincronizar</button>
+        </div>
+        
+        <!-- Painel de Sincronização -->
+        <div id="syncPanel" style="display: none; background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #333;">📱 Sincronizar PC ↔️ Celular</h3>
+            
+            <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <p style="margin: 0 0 12px 0; font-size: 14px; color: #333; font-weight: 600;">Método simples em 2 passos:</p>
+                
+                <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid #2196F3;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #1565c0;"><strong>📤 NO PC:</strong></p>
+                    <button onclick="exportData()" class="sync-action-btn" style="background: #2196F3; width: 100%;">
+                        📋 Copiar Todos os Dados
+                    </button>
+                </div>
+                
+                <div style="background: #fff3e0; padding: 12px; border-radius: 6px; border-left: 4px solid #ff9800;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #e65100;"><strong>📥 NO CELULAR:</strong></p>
+                    <button onclick="importData()" class="sync-action-btn" style="background: #ff9800; width: 100%;">
+                        📥 Colar e Importar Dados
+                    </button>
+                </div>
+            </div>
+            
+            <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <p style="margin: 0; font-size: 12px; color: #2e7d32;">
+                    ✅ <strong>Funciona offline!</strong> Copie no PC, envie por WhatsApp para você mesmo, e cole no celular.
+                </p>
+            </div>
+            
+            <div id="syncStatus" style="padding: 12px; background: white; border-radius: 6px; text-align: center; font-size: 13px; font-weight: 600; margin-top: 12px; display: none;">
+            </div>
+        </div>
+        
+        <div class="world-buttons">
+            <button class="world-btn" onclick="selectWorld('Elysian')">Elysian</button>
+            <button class="world-btn" onclick="selectWorld('Bellum')">Bellum</button>
+            <button class="world-btn active" onclick="selectWorld('Lunarian')">Lunarian</button>
+            <button class="world-btn" onclick="selectWorld('Auroria')">Auroria</button>
+            <button class="world-btn" onclick="selectWorld('Spectrum')">Spectrum</button>
+            <button class="world-btn" onclick="selectWorld('Mystian')">Mystian</button>
+            <button class="world-btn" onclick="selectWorld('Solarian')">Solarian</button>
+            <button class="world-btn" onclick="selectWorld('Belaria')">Belaria</button>
+            <button class="world-btn" onclick="selectWorld('Vesperia')">Vesperia</button>
+            <button class="world-btn" onclick="selectWorld('Tenebrium')">Tenebrium</button>
+            <button class="world-btn" onclick="selectWorld('Serenian')">Serenian</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Formulário -->
+        <div class="card">
+            <h1>🎮 Gerador de Anúncios</h1>
+            <p class="subtitle">Mundo: <span id="currentWorld" style="color: #667eea; font-weight: 600;">Lunarian</span></p>
+            
+            <!-- Itens em Promoção -->
+            <div class="form-section">
+                <div class="section-title">📦 Itens em Promoção</div>
+                <div class="input-group">
+                    <label>Cole seus itens aqui (separa automaticamente):</label>
+                    <textarea id="bulkPaste" placeholder="Ex: Souleater T4 — elysianSanguine Bow — elysianMutant Hide..." style="min-height: 80px;"></textarea>
+                    <button class="add-item-btn" onclick="processBulkPaste()" style="width: 100%;">📋 Processar Itens Colados</button>
+                </div>
+                <div style="margin: 12px 0; text-align: center; color: #999; font-size: 12px;">ou adicione um por um:</div>
+                <div id="itemsContainer">
+                    <div class="item-entry">
+                        <input type="text" placeholder="Ex: Soulsoles T3" class="item-input">
+                    </div>
+                </div>
+                <button class="add-item-btn" onclick="addItem()">+ Adicionar Item</button>
+            </div>
+            
+            <!-- Preços RCS -->
+            <div class="form-section">
+                <div class="section-title">💰 Preços RCS</div>
+                <div class="inline-inputs">
+                    <div class="input-group">
+                        <label>Venda (1k = R$)</label>
+                        <input type="number" id="vendaRcs" value="88" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>Compra (1k = R$)</label>
+                        <input type="number" id="compraRcs" value="82" step="0.01">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Valor KK -->
+            <div class="form-section">
+                <div class="section-title">💸 Valor do KK</div>
+                <div class="input-group">
+                    <label>Lunarian (R$ por 1kk)</label>
+                    <input type="number" id="valorKk" value="1.33" step="0.01">
+                </div>
+            </div>
+            
+            <!-- Chars Disponíveis -->
+            <div class="form-section">
+                <div class="section-title">🧙‍♂️ Chars Disponíveis</div>
+                <div id="charsContainer">
+                    <div class="item-entry">
+                        <input type="text" placeholder="Ex: Monk LVL 1012 – Skill 126+1 loyalt" class="char-input" style="margin-bottom: 8px;">
+                        <input type="text" placeholder="Preço (opcional, ex: 420r$)" class="char-price">
+                    </div>
+                </div>
+                <button class="add-item-btn" onclick="addChar()">+ Adicionar Char</button>
+            </div>
+            
+            <!-- Vendas Rubinot -->
+            <div class="form-section">
+                <div class="section-title">📊 Estatísticas</div>
+                <div class="input-group">
+                    <label>Total de vendas no Rubinot</label>
+                    <input type="text" id="vendasRubinot" value="+10000">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Preview -->
+        <div class="card">
+            <h1>📋 Seu Anúncio Pronto</h1>
+            <p class="subtitle">Texto formatado para WhatsApp</p>
+            
+            <div class="output-area" id="output"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">📋 Copiar Anúncio</button>
+            <div class="success-message" id="successMessage">✅ Copiado com sucesso!</div>
+        </div>
+    </div>
+    
+    <script>
+        // Dados para cada mundo
+        let worldsData = {
+            'Elysian': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Bellum': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Lunarian': { 
+                items: ['Soulsoles T3', 'Sanguine Rod T4', 'Sanguine Claws', 'Sanguine Galoshoes T3', 'Sanguine Rod T3', 'Soulshroud', 'Gnome Legs T2'], 
+                vendaRcs: 88, 
+                compraRcs: 82, 
+                valorKk: 1.33, 
+                chars: [
+                    {name: 'Monk LVL 1012 – Skill 126+1 loyalt', price: ''},
+                    {name: 'ED LVL 1100 – ML 121+3', price: '420r$'}
+                ], 
+                vendasRubinot: '+10000' 
+            },
+            'Auroria': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Spectrum': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Mystian': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Solarian': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Belaria': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Vesperia': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Tenebrium': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' },
+            'Serenian': { items: [], vendaRcs: 88, compraRcs: 82, valorKk: 1.33, chars: [], vendasRubinot: '+10000' }
+        };
+        
+        let currentWorld = 'Lunarian';
+        
+        // Carregar dados salvos do localStorage
+        function loadSavedData() {
+            const saved = localStorage.getItem('worldsAnunciosData');
+            if (saved) {
+                worldsData = JSON.parse(saved);
+            }
+        }
+        
+        // Salvar dados no localStorage
+        function saveData() {
+            localStorage.setItem('worldsAnunciosData', JSON.stringify(worldsData));
+        }
+        
+        // Selecionar mundo
+        function selectWorld(worldName) {
+            // Salvar dados do mundo atual antes de trocar
+            saveCurrentWorldData();
+            
+            currentWorld = worldName;
+            document.getElementById('currentWorld').textContent = worldName;
+            
+            // Atualizar botões ativos
+            document.querySelectorAll('.world-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === worldName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Carregar dados do novo mundo
+            loadWorldData();
+            generateAnnouncement();
+        }
+        
+        // Salvar dados do mundo atual
+        function saveCurrentWorldData() {
+            const data = worldsData[currentWorld];
+            
+            // Salvar itens
+            data.items = Array.from(document.querySelectorAll('.item-input'))
+                .map(input => input.value.trim())
+                .filter(val => val !== '');
+            
+            // Salvar preços
+            data.vendaRcs = parseFloat(document.getElementById('vendaRcs').value);
+            data.compraRcs = parseFloat(document.getElementById('compraRcs').value);
+            data.valorKk = parseFloat(document.getElementById('valorKk').value);
+            
+            // Salvar chars
+            const charInputs = document.querySelectorAll('.char-input');
+            const charPrices = document.querySelectorAll('.char-price');
+            data.chars = [];
+            charInputs.forEach((input, index) => {
+                const charText = input.value.trim();
+                const price = charPrices[index].value.trim();
+                if (charText) {
+                    data.chars.push({name: charText, price: price});
+                }
+            });
+            
+            // Salvar vendas
+            data.vendasRubinot = document.getElementById('vendasRubinot').value;
+            
+            saveData();
+        }
+        
+        // Carregar dados do mundo
+        function loadWorldData() {
+            const data = worldsData[currentWorld];
+            
+            // Limpar textarea de bulk paste
+            document.getElementById('bulkPaste').value = '';
+            
+            // Limpar e recriar itens
+            const itemsContainer = document.getElementById('itemsContainer');
+            itemsContainer.innerHTML = '';
+            if (data.items.length === 0) {
+                data.items = [''];
+            }
+            data.items.forEach(item => {
+                const newItem = document.createElement('div');
+                newItem.className = 'item-entry';
+                newItem.innerHTML = `
+                    ${data.items.length > 1 ? '<button class="remove-btn" onclick="this.parentElement.remove(); generateAnnouncement();">×</button>' : ''}
+                    <input type="text" placeholder="Ex: Soulsoles T3" class="item-input" value="${item}">
+                `;
+                itemsContainer.appendChild(newItem);
+                newItem.querySelector('.item-input').addEventListener('input', generateAnnouncement);
+            });
+            
+            // Carregar preços
+            document.getElementById('vendaRcs').value = data.vendaRcs;
+            document.getElementById('compraRcs').value = data.compraRcs;
+            document.getElementById('valorKk').value = data.valorKk;
+            
+            // Limpar e recriar chars
+            const charsContainer = document.getElementById('charsContainer');
+            charsContainer.innerHTML = '';
+            if (data.chars.length === 0) {
+                data.chars = [{name: '', price: ''}];
+            }
+            data.chars.forEach(char => {
+                const newChar = document.createElement('div');
+                newChar.className = 'item-entry';
+                newChar.innerHTML = `
+                    ${data.chars.length > 1 ? '<button class="remove-btn" onclick="this.parentElement.remove(); generateAnnouncement();">×</button>' : ''}
+                    <input type="text" placeholder="Ex: Monk LVL 1012 – Skill 126+1 loyalt" class="char-input" style="margin-bottom: 8px;" value="${char.name}">
+                    <input type="text" placeholder="Preço (opcional, ex: 420r$)" class="char-price" value="${char.price}">
+                `;
+                charsContainer.appendChild(newChar);
+                newChar.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', generateAnnouncement);
+                });
+            });
+            
+            // Carregar vendas
+            document.getElementById('vendasRubinot').value = data.vendasRubinot;
+        }
+        
+        // Processar itens colados em massa
+        function processBulkPaste() {
+            const bulkText = document.getElementById('bulkPaste').value;
+            if (!bulkText.trim()) {
+                alert('Cole os itens primeiro!');
+                return;
+            }
+            
+            // Separar itens - pode vir separado por quebra de linha ou por "—mundo"
+            let items = [];
+            
+            // Primeiro tentar separar por padrão "—mundo"
+            const worldPattern = /[—–-]\s*(elysian|bellum|lunarian|auroria|spectrum|mystian|solarian|belaria|vesperia|tenebrium|serenian)/gi;
+            
+            if (bulkText.match(worldPattern)) {
+                // Separar pelos marcadores de mundo
+                items = bulkText.split(worldPattern)
+                    .map(item => item.trim())
+                    .filter(item => item && !/(elysian|bellum|lunarian|auroria|spectrum|mystian|solarian|belaria|vesperia|tenebrium|serenian)/gi.test(item));
+            } else {
+                // Separar por quebra de linha
+                items = bulkText.split(/\n/)
+                    .map(item => item.trim())
+                    .filter(item => item);
+            }
+            
+            // Limpar container
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            
+            // Adicionar cada item
+            items.forEach((item, index) => {
+                const newItem = document.createElement('div');
+                newItem.className = 'item-entry';
+                newItem.innerHTML = `
+                    ${items.length > 1 ? '<button class="remove-btn" onclick="this.parentElement.remove(); generateAnnouncement();">×</button>' : ''}
+                    <input type="text" placeholder="Ex: Soulsoles T3" class="item-input" value="${item}">
+                `;
+                container.appendChild(newItem);
+                newItem.querySelector('.item-input').addEventListener('input', generateAnnouncement);
+            });
+            
+            // Limpar textarea
+            document.getElementById('bulkPaste').value = '';
+            
+            // Gerar anúncio
+            generateAnnouncement();
+            
+            // Feedback visual
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Itens processados!';
+            btn.style.background = '#4caf50';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+        
+        function generateAnnouncement() {
+            saveCurrentWorldData(); // Auto-salvar ao digitar
+            
+            // Coletar itens e limpar sufixos de mundo
+            const items = Array.from(document.querySelectorAll('.item-input'))
+                .map(input => {
+                    let value = input.value.trim();
+                    // Remover sufixos de mundo (ex: "— elysian", "—elysian", etc)
+                    value = value.replace(/\s*[—–-]\s*(elysian|bellum|lunarian|auroria|spectrum|mystian|solarian|belaria|vesperia|tenebrium|serenian)/gi, '');
+                    return value;
+                })
+                .filter(val => val !== '')
+                .join(' • ');
+            
+            // Preços RCS
+            const vendaRcs = document.getElementById('vendaRcs').value;
+            const compraRcs = document.getElementById('compraRcs').value;
+            
+            // Valor KK
+            const valorKk = document.getElementById('valorKk').value;
+            
+            // Chars
+            const charInputs = document.querySelectorAll('.char-input');
+            const charPrices = document.querySelectorAll('.char-price');
+            const chars = [];
+            charInputs.forEach((input, index) => {
+                const charText = input.value.trim();
+                const price = charPrices[index].value.trim();
+                if (charText) {
+                    if (price) {
+                        chars.push(`🧙‍♂ ${charText} – *${price}*`);
+                    } else {
+                        chars.push(`🧙‍♂ ${charText}`);
+                    }
+                }
+            });
+            
+            // Vendas
+            const vendas = document.getElementById('vendasRubinot').value;
+            
+            // Montar anúncio
+            let announcement = `✅ *ANÚNCIO — ${currentWorld.toUpperCase()}*
+
+*COMPRAMOS TODOS SEUS ITENS E CHAR COM FULL SET!  | INTERMEDIO DE CONTA E ITENS COM SEGURANÇA!*
+
+_Venda seus itens e char com Full Set com segurança e pagamento na hora! Aqui no mineiro a avaliação é gratuita!_
+━━━━━━━━━━━━━━`;
+
+            if (items) {
+                announcement += `
+*ITENS DISPONÍVEIS NA PROMOÇÃO:*
+${items}
+━━━━━━━━━━━━━━`;
+            }
+
+            announcement += `
+*💰VENDA DE RCS:*
+*🔹1k = ${vendaRcs}r$*
+
+*💰COMPRA DE RCS:*
+*🔹1k = ${compraRcs}r$*
+━━━━━━━━━━━━━━
+*🧙‍♂ COMPRO CHAR COM FULL SET*
+*🎯 Também compramos itens separados!*
+*🧾 PAGAMENTO RÁPIDO E JUSTO!*
+━━━━━━━━━━━━━━
+*💸 VALOR DO KK:*
+💠${currentWorld} = *${valorKk}r$ (pode variar)*
+━━━━━━━━━━━━━━`;
+
+            if (chars.length > 0) {
+                announcement += `
+*Chares Disponíveis:*
+${chars.join('\n')}
+━━━━━━━━━━━━━━`;
+            }
+
+            announcement += `
+*🚚 ENTREGA IMEDIATA!*
+_✅ ${vendas} vendas no Rubinot!_
+_⭐ FULL REFERÊNCIAS!_
+━━━━━━━━━━━━━━
+🔥 _VEM PRO MINEIRO!_ 🔥
+💥 _AQUI É CONFIANÇA E MELHOR PREÇO!_ 💥`;
+
+            document.getElementById('output').textContent = announcement;
+        }
+        
+        function addItem() {
+            const container = document.getElementById('itemsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'item-entry';
+            newItem.innerHTML = `
+                <button class="remove-btn" onclick="this.parentElement.remove(); generateAnnouncement();">×</button>
+                <input type="text" placeholder="Ex: Sanguine Rod T4" class="item-input">
+            `;
+            container.appendChild(newItem);
+            newItem.querySelector('.item-input').addEventListener('input', generateAnnouncement);
+            generateAnnouncement();
+        }
+        
+        function addChar() {
+            const container = document.getElementById('charsContainer');
+            const newChar = document.createElement('div');
+            newChar.className = 'item-entry';
+            newChar.innerHTML = `
+                <button class="remove-btn" onclick="this.parentElement.remove(); generateAnnouncement();">×</button>
+                <input type="text" placeholder="Ex: ED LVL 1100 – ML 121+3" class="char-input" style="margin-bottom: 8px;">
+                <input type="text" placeholder="Preço (opcional, ex: 420r$)" class="char-price">
+            `;
+            container.appendChild(newChar);
+            newChar.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', generateAnnouncement);
+            });
+            generateAnnouncement();
+        }
+        
+        function copyToClipboard() {
+            const text = document.getElementById('output').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 2000);
+            });
+        }
+        
+        // Adicionar eventos a todos os inputs
+        document.querySelectorAll('input, textarea').forEach(element => {
+            element.addEventListener('input', generateAnnouncement);
+        });
+        
+        // Inicializar
+        loadSavedData();
+        loadWorldData();
+        generateAnnouncement();
+        
+        // ===== SISTEMA DE SINCRONIZAÇÃO VIA CLIPBOARD =====
+        
+        function toggleSyncPanel() {
+            const panel = document.getElementById('syncPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function updateSyncStatus(message, color, show = true) {
+            const status = document.getElementById('syncStatus');
+            status.textContent = message;
+            status.style.color = color;
+            status.style.display = show ? 'block' : 'none';
+            
+            if (show) {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 4000);
+            }
+        }
+        
+        async function exportData() {
+            try {
+                const data = {
+                    worldsData: worldsData,
+                    currentWorld: currentWorld,
+                    timestamp: Date.now(),
+                    version: '1.0'
+                };
+                
+                const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+                
+                await navigator.clipboard.writeText(encoded);
+                
+                updateSyncStatus('✅ Dados copiados! Agora cole no celular', '#4caf50');
+                
+                // Mostrar preview do código
+                const preview = encoded.substring(0, 50) + '...';
+                alert(`✅ Dados copiados com sucesso!\n\nCódigo: ${preview}\n\n📱 No celular:\n1. Abra esta página\n2. Clique em "Sincronizar"\n3. Clique em "Colar e Importar"\n\nOu envie o código por WhatsApp para você mesmo!`);
+                
+            } catch (e) {
+                console.error('Erro:', e);
+                
+                // Fallback: mostrar em um prompt
+                const data = {
+                    worldsData: worldsData,
+                    currentWorld: currentWorld,
+                    timestamp: Date.now(),
+                    version: '1.0'
+                };
+                
+                const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+                
+                prompt('Copie este código e cole no celular:', encoded);
+                updateSyncStatus('ℹ️ Copie o código manualmente', '#2196F3');
+            }
+        }
+        
+        async function importData() {
+            try {
+                let encoded = '';
+                
+                // Tentar ler do clipboard
+                try {
+                    encoded = await navigator.clipboard.readText();
+                } catch (e) {
+                    // Se não conseguir, pedir manualmente
+                    encoded = prompt('Cole o código copiado do PC:');
+                }
+                
+                if (!encoded || encoded.trim() === '') {
+                    updateSyncStatus('❌ Nenhum código fornecido', '#f44336');
+                    return;
+                }
+                
+                updateSyncStatus('🟡 Importando dados...', '#ff9800');
+                
+                const decoded = JSON.parse(decodeURIComponent(atob(encoded.trim())));
+                
+                if (!decoded.worldsData || !decoded.version) {
+                    throw new Error('Código inválido');
+                }
+                
+                worldsData = decoded.worldsData;
+                saveDataLocal();
+                
+                if (decoded.currentWorld) {
+                    selectWorld(decoded.currentWorld);
+                } else {
+                    loadWorldData();
+                    generateAnnouncement();
+                }
+                
+                const date = new Date(decoded.timestamp);
+                updateSyncStatus(`✅ Importado! (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`, '#4caf50');
+                
+                alert('✅ Dados importados com sucesso!\n\nTodos os mundos foram sincronizados.');
+                
+            } catch (e) {
+                console.error('Erro:', e);
+                updateSyncStatus('❌ Código inválido ou corrompido', '#f44336');
+                alert('❌ Erro ao importar!\n\nVerifique se você copiou o código completo.');
+            }
+        }
+        
+        function saveDataLocal() {
+            localStorage.setItem('worldsAnunciosData', JSON.stringify(worldsData));
+        }
+        
+        function saveData() {
+            saveDataLocal();
+        }
+    </script>
+</body>
+</html>
